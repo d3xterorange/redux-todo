@@ -1,7 +1,9 @@
 import { ADD_TODO } from "../constants/action-types";
 
 const initialState = {
-  todos: []
+  todos: [{
+    text: 'intial todo',
+  }]
 };
 
 function rootReducer(state = initialState, action) {

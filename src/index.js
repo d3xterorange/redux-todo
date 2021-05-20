@@ -8,24 +8,21 @@ const themeBtn = document.getElementById('theme');
 const todoForm = document.querySelector('.mainTodo');
 const inputTask = document.querySelector('.form-control');
 
-let todos = Object.keys(store.getState().todos);
-console.log(todos);
+let todos = store.getState().todos
 
-console.log(store.dispatch(addTodo({ todos: 'aaa'}))); 
+store.subscribe(render);
 
-store.subscribe(() => render());
-
-window.todo = todos;
-
-todoAddBtn.addEventListener('click', addItem)
 todoForm.addEventListener('submit', addItem)
 window.addEventListener('load', render);
 
 function render() {
+  const newState = store.getState()
+
   todoList.innerHTML = '';
-  todos.forEach(todo => {
+
+  newState.todos.forEach(({ text }) => {
     const todoItem = document.createElement('li');
-    todoItem.innerText = todo.toString();
+    todoItem.innerText = text
     todoItem.classList.add('list-group-item');
     todoList.appendChild(todoItem);
   });
@@ -36,8 +33,8 @@ themeBtn.addEventListener('click',  ()=> {
 })
 
 function addItem(e){
-  store.dispatch( addTodo({ todos: 'aaa', id: 1}) )
-    // todos.push(inputTask.value);
-    // inputTask.value = '';
-    e.preventDefault();
+  e.preventDefault();
+
+  store.dispatch(addTodo({ text: inputTask.value }))
+  inputTask.value = '';
 }

@@ -26,3 +26,8 @@ body.dark .list-group-item {
   align-items: center;
   justify-content: space-between;
 }
+
+.done {
+  text-decoration: line-through;
+  font-style: italic;
+}

@@ -1,43 +1,68 @@
 import './styles.css';
 import store from "./js/store/index";
-import { addTodo } from "./js/actions/index";
+import { addTodo, switchTheme, isDone, deleteTodo } from "./js/actions/index";
 
 const todoList = document.querySelector('.list-group');
-const todoAddBtn = document.getElementById('add');
 const themeBtn = document.getElementById('theme');
 const todoForm = document.querySelector('.mainTodo');
 const inputTask = document.querySelector('.form-control');
 
-let todos = Object.keys(store.getState().todos);
-console.log(todos);
+store.subscribe(render);
 
-console.log(store.dispatch(addTodo({ todos: 'aaa'}))); 
-
-store.subscribe(() => render());
-
-window.todo = todos;
-
-todoAddBtn.addEventListener('click', addItem)
 todoForm.addEventListener('submit', addItem)
 window.addEventListener('load', render);
+themeBtn.addEventListener('click', switchPageTheme);
+todoList.addEventListener('click', doneItem);
+todoList.addEventListener('click', deleteItem);
 
-function render() {
+
+function render(e) {
+  const newState = store.getState();
   todoList.innerHTML = '';
-  todos.forEach(todo => {
+  newState.todos.forEach(({ id, text, isDone }) => {
     const todoItem = document.createElement('li');
-    todoItem.innerText = todo.toString();
+    todoItem.innerText = `${id}. `+ text;
+    todoItem.id = id;
     todoItem.classList.add('list-group-item');
     todoList.appendChild(todoItem);
+    if (isDone === true) todoItem.classList.add('done');
   });
+  if (newState.isDarkTheme) {document.body.classList.add('dark')} else {document.body.classList.remove('dark')}
 };
 
-themeBtn.addEventListener('click',  ()=> {
-  document.body.classList.toggle('dark');
-})
-
 function addItem(e){
-  store.dispatch( addTodo({ todos: 'aaa', id: 1}) )
-    // todos.push(inputTask.value);
-    // inputTask.value = '';
-    e.preventDefault();
+  e.preventDefault();
+  const currentId = store.getState().todos.length;
+  store.dispatch(addTodo({id: currentId+1, text: inputTask.value, isDone: false}))
+  inputTask.value = '';
+}
+
+function doneItem(e){
+  if (!e.ctrlKey) {
+let newTodos = store.getState().todos.map((todo) => {
+  if(todo.id !== parseInt(e.target.id)) {
+      return todo;
+  }
+ return Object.assign({}, todo, {isDone: !todo.isDone});
+});
+store.dispatch(isDone(newTodos))
+}
+}
+
+function deleteItem(e) {
+  if (e.ctrlKey) {
+    console.log();
+    let newTodos = store.getState().todos;
+    let newId = 0;
+    newTodos.splice(parseInt(e.target.id-1), 1);
+    newTodos = newTodos.map((todo) => {
+     newId++;
+     return Object.assign({}, todo, {id: newId});
+    });
+    store.dispatch(deleteTodo(newTodos))
+  }
+}
+
+function switchPageTheme() {
+  store.dispatch(switchTheme(!store.getState().isDarkTheme))
 }
